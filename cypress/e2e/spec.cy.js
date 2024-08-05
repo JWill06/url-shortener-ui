@@ -1,13 +1,24 @@
-describe('empty spec', () => {
+describe('Rendering shortended urls', () => {
+  let initialData;
+  let mockPostRequest;
+
   beforeEach(() => {
+    cy.fixture('example.json').then((data) => {
+      initialData = data;
+    });
+
+    cy.fixture('postUrl.json').then((data) => {
+      mockPostRequest = data.urls;
+    });
+
     cy.intercept('GET', 'http://localhost:3001/api/v1/urls', {
       statusCode: 200,
-      fixture: 'example.json'
+      body: initialData 
     }).as('getUrls');
-    // cy.intercept('POST', 'http://localhost:3001/api/v1/urls', {
-    //   statusCode: 200,
-    //   fixture: 'example.json'
-    // }).as('postUrl');
+    cy.intercept('POST', 'http://localhost:3001/api/v1/urls', {
+      statusCode: 201,
+      body: mockPostRequest
+    }).as('postUrl');
     cy.visit('http://localhost:3000')
   })
   it('Should render a title', () => {
@@ -23,24 +34,14 @@ describe('empty spec', () => {
     .and('contain', 'useshorturl/1')
     .and('contain', 'https://images.unsplash.com/photo-1531898418865-480b7090470f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80')
   })
-  it('Should add a new card and be displayed on the page', () => {
-    cy.intercept('POST', 'http://localhost:3001/api/v1/urls', {
-      statusCode: 201,
-      body: {
-        id: 4,
-        long_url: "https://kh.wiki.gallery/images/thumb/2/2e/Woody_KHIII.png/205px-Woody_KHIII.png",
-        short_url: "http://localhost:3001/useshorturl/testPost",
-        title: "Jessies Girl"
-      } 
-    }).as('postUrl');
-  
+  it('Should add a new card', () => {
     cy.get('input[name="title"]').type('Jessies Girl');
     cy.get('input[name="url"]').type('https://kh.wiki.gallery/images/thumb/2/2e/Woody_KHIII.png/205px-Woody_KHIII.png');
     cy.get('button').click();
   
-    // cy.wait('@postUrl');
-  
+    cy.wait('@postUrl');
+
     cy.get('.url').should('contain', 'Jessies Girl');
-    cy.get('.url').should('contain', 'https://kh.wiki.gallery/images/thumb/2/2e/Woody_KHIII.png/205px-Woody_KHIII.png');
-  });
+    cy.get('.url').should('contain', 'http://localhost:3001/useshorturl/3');
+  })
 })
