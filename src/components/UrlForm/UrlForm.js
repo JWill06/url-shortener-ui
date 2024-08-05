@@ -15,7 +15,7 @@ function UrlForm({addUrl}) {
     }
     try {
       const addedUrl = await updatedNewUrl(newURL)
-      addUrl({addedUrl})
+      addUrl(addedUrl)
       clearInputs();
     }catch (error){
       throw new Error('Failed to add new Url. Try again.')
