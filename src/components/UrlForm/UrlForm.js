@@ -1,12 +1,25 @@
 import React, { useState } from 'react';
+import { updatedNewUrl } from '../../apiCalls';
 
-function UrlForm() {
+function UrlForm({addUrl}) {
   const [title, setTitle] = useState('');
   const [urlToShorten, setUrlToShorten] = useState('');
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    clearInputs();
+
+    const newURL = {
+      id: Date.now(),
+      long_url: urlToShorten,
+      title,
+    }
+    try {
+      const addedUrl = await updatedNewUrl(newURL)
+      addUrl({addedUrl})
+      clearInputs();
+    }catch (error){
+      throw new Error('Failed to add new Url. Try again.')
+    }
   }
 
   const clearInputs = () => {
@@ -15,24 +28,26 @@ function UrlForm() {
   }
 
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <input
         type='text'
         placeholder='Title...'
+        required
         name='title'
         value={title}
-        // onChange={e => }
+        onChange={e => setTitle(e.target.value)}
       />
 
       <input
         type='text'
         placeholder='URL to Shorten...'
-        name='title'
-        value={title}
-        // onChange={e => }
+        required
+        name='url'
+        value={urlToShorten}
+        onChange={e => setUrlToShorten(e.target.value)}
       />
 
-      <button onClick={e => handleSubmit(e)}>
+      <button>
         Shorten Please!
       </button>
     </form>
